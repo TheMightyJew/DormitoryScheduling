@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="DormitorySchedulling" target="1.5" />
+      <module name="DormitorySchedulling" target="6" />
     </bytecodeTargetLevel>
   </component>
 </project>
