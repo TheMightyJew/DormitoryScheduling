@@ -103,6 +103,12 @@ public class SATCompiler {
 
     public static void main(String[] args) {
 
+        //
+        //stevenCNF();
+
+    }
+
+    private static void rotemCNF(){
         SymbolTracker tracker = new SymbolTracker();
         tracker.addFunctions( "LiveAt","Student","Apartment");
         tracker.addConstants("209202126","111111111","A1", "a", "b", "c", "d", "e", "f");
@@ -112,8 +118,6 @@ public class SATCompiler {
 //        System.out.println(steven.toString());
         System.out.println(stat[00].toString());
         System.out.println(stat[1].toString());
-        //stevenCNF();
-
     }
 
     private static void stevenCNF(){

@@ -7,15 +7,27 @@ public class Student {
     }
 
     private String ID;
+    private String firstName;
+    private String lastName;
     private Sex sex;
     private int Study_Year;
     private Student_Request studentRequest;
 
-    public Student(String ID, Sex sex, int study_Year, Student_Request studentRequest) {
+    public Student(String ID, String firstName, String lastName, Sex sex, int study_Year, Student_Request studentRequest) {
         this.ID = ID;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.sex = sex;
         Study_Year = study_Year;
         this.studentRequest = studentRequest;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getID() {
