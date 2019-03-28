@@ -50,4 +50,16 @@ public class Student {
     public Student_Request getStudentRequest() {
         return studentRequest;
     }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "ID='" + ID + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", sex=" + sex +
+                ", Study_Year=" + Study_Year +
+                ", studentRequest=" + studentRequest +
+                '}';
+    }
 }

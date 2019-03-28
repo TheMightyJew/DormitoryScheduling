@@ -55,4 +55,18 @@ public class Student_Request {
     public Set<Student> getUnwanted() {
         return unwanted;
     }
+
+    @Override
+    public String toString() {
+        return "Student_Request{" +
+                "dormitory_type=" + dormitory_type +
+                ", room_quantity=" + room_quantity +
+                ", couples_dormitory=" + couples_dormitory +
+                ", max_price=" + max_price +
+                ", religious=" + religious +
+                ", smoking=" + smoking +
+                ", wanted=" + wanted +
+                ", unwanted=" + unwanted +
+                '}';
+    }
 }
