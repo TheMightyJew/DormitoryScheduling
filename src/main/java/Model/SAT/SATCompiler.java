@@ -1,6 +1,8 @@
 package Model.SAT;
 
 import Model.Apartment;
+import Model.SAT.logic.StatementCNF;
+import Model.SAT.logic.structures.SymbolTracker;
 import Model.Student;
 
 import java.util.ArrayList;
@@ -33,6 +35,11 @@ public class SATCompiler {
     }
 
     public static void main(String[] args) {
+        SymbolTracker tracker = new SymbolTracker();
+        tracker.addFunctions( "LiveAt");
+        String fol = "EXISTS(x) LiveAt(2,x) AND LiveAt(3,x)";
+        StatementCNF cnf = StatementCNF.fromInfixString(fol,tracker);
+        System.out.println(cnf.toString());
         String test="(aANDb)OR(cANDd)OR(eANDf)";
         System.out.println(test);
         System.out.println(FOL2CNF(test));
