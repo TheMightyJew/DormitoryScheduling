@@ -1,11 +1,8 @@
 package Model.SAT;
 
-import Model.Apartment;
-import Model.Couples_Dormitory;
+import Model.*;
 import Model.SAT.logic.StatementCNF;
 import Model.SAT.logic.structures.SymbolTracker;
-import Model.Student;
-import Model.Student_Request;
 
 import java.util.*;
 
@@ -32,17 +29,24 @@ public class SATCompiler {
     }
 
     private void add_Student_At_Apartment_Predicates(){
-//        for (Student student:students) {
-//            StatementCNF statementCNF=StatementCNF.fromInfixString("EXISTS(x1) LiveAt("+student.getID()+",x1) AND !EXISTS(x2) LiveAt("+student.getID()+",x2)",tracker);
-//        }
-
         for (Student student:students) {
             String str="";
             for(int i=0;i<apartments.size();i++){
+                boolean unsuitable_apartment=false;
+                if (!(apartments.get(i) instanceof Couple_Apartment) && student.getStudentRequest().getCouples_dormitory().equals(Couples_Dormitory.YES)) {
+                    unsuitable_apartment=true;
+                }
+                else if ((apartments.get(i).getDormitory_type().equals(Dormitory.Dormitory_Type.DALED_TROMIM_FEMALES) && student.getSex().equals(Student.Sex.MALE)) || (apartments.get(i).getDormitory_type().equals(Dormitory.Dormitory_Type.DALED_TROMIM_MALES) && student.getSex().equals(Student.Sex.FEMALE))) {
+                    unsuitable_apartment=true;
+                }
+                if(unsuitable_apartment){
+                    statements.add(StatementCNF.fromInfixString("!LiveAt("+student.getID()+","+apartments.get(i).getApartment_ID()+")",tracker));
+                    continue;
+                }
                 if(str.isEmpty()==false){
                     str+=str+" OR ";
                 }
-                str="( LiveAt("+student.getID()+","+apartments.get(i).getApartment_ID()+")";
+                str+="( LiveAt("+student.getID()+","+apartments.get(i).getApartment_ID()+")";
                 for(int j=0;j<apartments.size();j++){
                     if(i!=j){
                         str+=" AND !LiveAt("+student.getID()+","+apartments.get(j).getApartment_ID()+")";
@@ -50,7 +54,6 @@ public class SATCompiler {
                 }
                 str+=" )";
             }
-            //str=FOL2CNF(str);
             statements.add(StatementCNF.fromInfixString(str,tracker));
         }
     }
@@ -122,11 +125,33 @@ public class SATCompiler {
                 couple=true;
                 requesedID=student_request1.getWanted().iterator().next().getID();
             }
-            for(Student student2:student_request1.getUnwanted()){
+            for(Student student2:student_request1.getWanted()){
+                String live_together="";
+                boolean first=true;
                 for (Apartment apartment:apartments) {
-                    String cant_live_together="!( LiveAt("+student1.getID()+","+apartment.getApartment_ID()+") AND LiveAt("+student2.getID()+","+apartment.getApartment_ID()+")";
-                    statements.add(StatementCNF.fromInfixString(cant_live_together,tracker));
+                    if(first==false){
+                        live_together+=" OR ";
+                    }
+                    else{
+                        first=false;
+                    }
+                    live_together="( LiveAt("+student1.getID()+","+apartment.getApartment_ID()+") AND LiveAt("+student2.getID()+","+apartment.getApartment_ID()+" )";
                 }
+                statements.add(StatementCNF.fromInfixString(live_together,tracker));
+            }
+            for(Student student2:student_request1.getUnwanted()){
+                String cant_live_together="";
+                boolean first=true;
+                for (Apartment apartment:apartments) {
+                    if(first==false){
+                        cant_live_together+=" AND ";
+                    }
+                    else{
+                        first=false;
+                    }
+                    cant_live_together="!( LiveAt("+student1.getID()+","+apartment.getApartment_ID()+") AND LiveAt("+student2.getID()+","+apartment.getApartment_ID()+")";
+                }
+                statements.add(StatementCNF.fromInfixString(cant_live_together,tracker));
             }
             for(int j=i+1;j<students.size();j++){
                 String fol="";
