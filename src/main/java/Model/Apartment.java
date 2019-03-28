@@ -1,13 +1,16 @@
 package Model;
 
+import java.util.Set;
+
 public class Apartment {
 
-    private enum Level {LEVEL_0,LEVEL_1,LEVEL_2,LEVEL_3,LEVEL_4,LEVEL_5,LEVEL_6,LEVEL_7,LEVEL_8}
-
-    private Dormitory_Type dormitory_type;
-    private Disabled_Access disabled_access;
+    private Set<Room> rooms;
+    private int Apartment_ID;
+    private Dormitory.Dormitory_Type dormitory_type;
     private Room_Quantity room_quantity;
-    private Level level;
+    private Couples_Dormitory couples_dormitory;
+    private int Apartment_Quantity;
+    private int floor;
     private int price;
 
 }

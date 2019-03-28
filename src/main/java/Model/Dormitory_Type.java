@@ -1,5 +1,0 @@
-package Model;
-
-public enum Dormitory_Type {
-    DALED_EAST,DALED_WEST,DALED_INTERNATIONAL,DALED_TROMIM,GIMEL_EAST,GIMEL_WEST
-}
