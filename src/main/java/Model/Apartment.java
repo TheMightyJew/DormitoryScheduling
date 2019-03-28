@@ -40,6 +40,18 @@ public abstract class Apartment {
         return floor;
     }
 
+    @Override
+    public String toString() {
+        return "Apartment{" +
+                "Apartment_ID='" + Apartment_ID + '\'' +
+                ", dormitory_type=" + dormitory_type +
+                ", room_quantity=" + room_quantity +
+                ", Apartment_Quantity=" + Apartment_Quantity +
+                ", floor=" + floor +
+                ", price=" + price +
+                '}';
+    }
+
     public int getPrice() {
         return price;
     }
