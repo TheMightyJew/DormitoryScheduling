@@ -7,15 +7,13 @@ import Model.SAT.logic.structures.SymbolTracker;
 import Model.Student;
 import Model.Student_Request;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SATCompiler {
-    private HashMap<Integer,Predicate> predicates_map;
+    private HashMap<Integer,Predicate> ID_Predicate_Map;
+    private HashMap<Predicate,Integer> Predicate_ID_Map;
     private Integer counter=0;
-    private static String or=")OR(";
+    private static String or=") OR (";
     private static String and="AND";
     private List<Apartment> apartments;
     private List<Student> students;
@@ -23,7 +21,8 @@ public class SATCompiler {
     private List<StatementCNF> statements;
 
     public SATCompiler(List<Apartment> apartments, List<Student> students) {
-        this.predicates_map = new HashMap<Integer, Predicate>();
+        this.ID_Predicate_Map = new HashMap<Integer, Predicate>();
+        this.Predicate_ID_Map=new HashMap<Predicate, Integer>();
         this.counter = counter;
         this.apartments = apartments;
         this.students = students;
@@ -33,11 +32,26 @@ public class SATCompiler {
     }
 
     private void add_Student_At_Apartment_Predicates(){
+//        for (Student student:students) {
+//            StatementCNF statementCNF=StatementCNF.fromInfixString("EXISTS(x1) LiveAt("+student.getID()+",x1) AND !EXISTS(x2) LiveAt("+student.getID()+",x2)",tracker);
+//        }
+
         for (Student student:students) {
-            for (Apartment apartment:apartments) {
-                Predicate_Student_At_Apartment predicate=new Predicate_Student_At_Apartment(student,apartment);
-                predicates_map.put(counter,predicate);
+            String str="";
+            for(int i=0;i<apartments.size();i++){
+                if(str.isEmpty()==false){
+                    str+=str+" OR ";
+                }
+                str="( LiveAt("+student.getID()+","+apartments.get(i).getApartment_ID()+")";
+                for(int j=0;j<apartments.size();j++){
+                    if(i!=j){
+                        str+=" AND !LiveAt("+student.getID()+","+apartments.get(j).getApartment_ID()+")";
+                    }
+                }
+                str+=" )";
             }
+            //str=FOL2CNF(str);
+            statements.add(StatementCNF.fromInfixString(str,tracker));
         }
     }
 
@@ -54,6 +68,47 @@ public class SATCompiler {
             tracker.addConstants(apartment.getApartment_ID());
             StatementCNF statementCNF=StatementCNF.fromInfixString("Apartment("+apartment.getApartment_ID()+")",tracker);
             statements.add(statementCNF);
+            List<ArrayList<Student>> groups=new ArrayList<ArrayList<Student>>();
+            combinations2(students, apartment.getApartment_Quantity()+1, 0,0, new ArrayList<Student>(),groups);
+            String str= null;
+            for (ArrayList<Student> result:groups) {
+                if(str != null){
+                    str+=") AND !(";
+                }
+                else
+                    str = "!( ";
+                boolean first = true;
+                for (Student student:result) {
+                    if(!first)
+                        str += " AND ";
+                    else
+                        first = !first;
+                    str+="LiveAt("+student.getID()+","+apartment.getApartment_Quantity()+")";
+
+                }
+            }
+            str+=")";
+            statements.add(StatementCNF.fromInfixString(str, tracker));
+        }
+    }
+
+    static void combinations2(List<Student> arr, int len,int layer, int startPosition, ArrayList<Student> result, List<ArrayList<Student>> groups){
+        if (len == 0){
+            groups.add(result);
+            return;
+        }
+        for (int i = startPosition; i <= arr.size()-len; i++){
+            if(layer == result.size())
+                result.add(arr.get(i));
+            else{
+                ArrayList<Student> temp = new ArrayList<Student>();
+                for(Student s : result)
+                    temp.add(s);
+                temp.set(layer, arr.get(i));
+                result = temp;
+            }
+
+            combinations2(arr, len-1, layer + 1,i+1, result, groups);
         }
     }
 
@@ -67,46 +122,82 @@ public class SATCompiler {
                 couple=true;
                 requesedID=student_request1.getWanted().iterator().next().getID();
             }
+            for(Student student2:student_request1.getUnwanted()){
+                for (Apartment apartment:apartments) {
+                    String cant_live_together="!( LiveAt("+student1.getID()+","+apartment.getApartment_ID()+") AND LiveAt("+student2.getID()+","+apartment.getApartment_ID()+")";
+                    statements.add(StatementCNF.fromInfixString(cant_live_together,tracker));
+                }
+            }
             for(int j=i+1;j<students.size();j++){
-                String cant_live_together="!EXISTS(x) Apartment(x) AND LiveAt("+students.get(i).getID()+",x) AND LiveAt("+students.get(j).getID()+",x)";
                 String fol="";
                 StatementCNF cnf;
                 Student student2=students.get(j);
+                boolean unwanted=false;
                 Student_Request student_request2=student1.getStudentRequest();
                 if(students.get(i).getSex().equals(students.get(j).getSex())==false){
                     if(!(couple && requesedID.equals(student2.getID()))){
-                        fol = cant_live_together;
+                        unwanted=true;
                     }
                 }
                 else if(student_request1.getSmoking()!=student_request2.getSmoking()){
-                    fol =cant_live_together;
-
+                    unwanted=true;
                 }
                 else if(student_request1.getReligious()!=student_request2.getReligious()){
-                    fol =cant_live_together;
-
+                    unwanted=true;
                 }
-                if(fol.isEmpty()==false)
-                    cnf = StatementCNF.fromInfixString(fol,tracker);
+                if(unwanted){
+                    for (Apartment apartment:apartments) {
+                        fol="!( LiveAt("+student1.getID()+","+apartment.getApartment_ID()+") AND LiveAt("+student2.getID()+","+apartment.getApartment_ID()+")";
+                        statements.add(StatementCNF.fromInfixString(fol,tracker));
+                    }
+                }
+
             }
         }
     }
 
-
-    public void addApartment(Apartment apartment){
-
-    }
-
-    public void addStudent(Student student){
-
-    }
-
     public static void main(String[] args) {
 
-        //
+        ArrayList<Student> students=new ArrayList<Student>();
+        students.add(new Student("1"));
+        students.add(new Student("2"));
+        students.add(new Student("3"));
+        students.add(new Student("4"));
+        List<ArrayList<Student>> groups=new ArrayList<ArrayList<Student>>();
+        combinations2(students, 2, 0,0, new ArrayList<Student>(),groups);
+        int a=0;
+
+//        SymbolTracker tracker=new SymbolTracker();
+//        tracker.addFunctions( "LiveAt","Apartment","Student");
+//        tracker.addConstants("222");
+//        StatementCNF hagdara=StatementCNF.fromInfixString("Student(222)",tracker);
+//        StatementCNF statementCNF=StatementCNF.fromInfixString("EXISTS(x1) LiveAt(222,x1) AND !EXISTS(x2) LiveAt(222,x2)",tracker);
+//        System.out.println(statementCNF);
+
+//        try{
+//            ISolver solver = SolverFactory.newDefault();
+//            Reader reader = new DimacsReader(solver);
+//            // CNF filename is given on the command line
+//                IProblem problem = reader.parseInstance("C:\\Users\\stiven\\IdeaProjects\\DormitorySchedulling\\src\\main\\java\\Model\\test.txt");
+//                if (problem.isSatisfiable()) {
+//                    System.out.println("Satisfiable !");
+//                    for(int num:problem.model()){
+//                        System.out.print(num+",");
+//                    }
+//                } else {
+//                    System.out.println("Unsatisfiable !");
+//                }
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
+
+
+        //rotemCNF();
         //stevenCNF();
 
     }
+
 
     private static void rotemCNF(){
         SymbolTracker tracker = new SymbolTracker();
@@ -120,13 +211,13 @@ public class SATCompiler {
         System.out.println(stat[1].toString());
     }
 
-    private static void stevenCNF(){
+    private void stevenCNF(){
         String test="(aANDb)OR(cANDd)OR(eANDf)";
         System.out.println(test);
         System.out.println(FOL2CNF(test));
     }
 
-    public static String FOL2CNF(String str){
+    public String FOL2CNF(String str){
         ArrayList<ArrayList<String>> arr=new ArrayList<ArrayList<String>>();
         while (str.contains(or)){
             ArrayList<String> smallArr=new ArrayList<String>();
