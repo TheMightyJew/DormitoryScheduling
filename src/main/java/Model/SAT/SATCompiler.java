@@ -45,12 +45,15 @@ public class SATCompiler {
                 } else if ((apartments.get(i).getDormitory_type().equals(Dormitory.Dormitory_Type.DALED_TROMIM_FEMALES) && student.getSex().equals(Student.Sex.MALE)) || (apartments.get(i).getDormitory_type().equals(Dormitory.Dormitory_Type.DALED_TROMIM_MALES) && student.getSex().equals(Student.Sex.FEMALE))) {
                     unsuitable_apartment = true;
                 }
+                else  if(apartments.get(i).getDormitory_type().equals(student.getStudentRequest().getDormitory_type())==false){
+                    unsuitable_apartment = true;
+                }
                 if (unsuitable_apartment) {
                     statements.add(StatementCNF.fromInfixString("!LiveAt(" + student.getID() + "," + apartments.get(i).getApartment_ID() + ")", tracker));
                     continue;
                 }
                 if (str.isEmpty() == false) {
-                    str += str + " OR ";
+                    str +=" OR ";
                 }
                 str += "( LiveAt(" + student.getID() + "," + apartments.get(i).getApartment_ID() + ")";
                 for (int j = 0; j < apartments.size(); j++) {
@@ -60,7 +63,9 @@ public class SATCompiler {
                 }
                 str += " )";
             }
-            statements.add(StatementCNF.fromInfixString(str, tracker));
+            if(str.isEmpty()==false){
+                statements.add(StatementCNF.fromInfixString(str, tracker));
+            }
         }
     }
 
@@ -142,7 +147,7 @@ public class SATCompiler {
                     } else {
                         first = false;
                     }
-                    live_together = "( LiveAt(" + student1.getID() + "," + apartment.getApartment_ID() + ") AND LiveAt(" + student2.getID() + "," + apartment.getApartment_ID() + " ) )";
+                    live_together += "( LiveAt(" + student1.getID() + "," + apartment.getApartment_ID() + ") AND LiveAt(" + student2.getID() + "," + apartment.getApartment_ID() + " ) )";
                 }
                 statements.add(StatementCNF.fromInfixString(live_together, tracker));
             }
@@ -155,7 +160,7 @@ public class SATCompiler {
                     } else {
                         first = false;
                     }
-                    cant_live_together = "!( LiveAt(" + student1.getID() + "," + apartment.getApartment_ID() + ") AND LiveAt(" + student2.getID() + "," + apartment.getApartment_ID() + ")";
+                    cant_live_together += "!( LiveAt(" + student1.getID() + "," + apartment.getApartment_ID() + ") AND LiveAt(" + student2.getID() + "," + apartment.getApartment_ID() + ")";
                 }
                 statements.add(StatementCNF.fromInfixString(cant_live_together, tracker));
             }
@@ -164,12 +169,13 @@ public class SATCompiler {
                 StatementCNF cnf;
                 Student student2 = students.get(j);
                 boolean unwanted = false;
-                Student_Request student_request2 = student1.getStudentRequest();
+                Student_Request student_request2 = student2.getStudentRequest();
                 if (students.get(i).getSex().equals(students.get(j).getSex()) == false) {
                     if (!(couple && requesedID.equals(student2.getID()))) {
                         unwanted = true;
                     }
-                } else if (student_request1.getSmoking() != student_request2.getSmoking()) {
+                }
+                if (student_request1.getSmoking() != student_request2.getSmoking()) {
                     unwanted = true;
                 } else if (student_request1.getReligious() != student_request2.getReligious()) {
                     unwanted = true;
@@ -269,6 +275,7 @@ public class SATCompiler {
     }
 
     public static void main(String[] args) {
+        //test();
         ArrayList<Apartment> apartments = new ArrayList<Apartment>();
         ArrayList<Student> students = new ArrayList<Student>();
         Couple_Apartment apartment1 = new Couple_Apartment("D1", Dormitory.Dormitory_Type.DALED_EAST, Room_Quantity.SINGLE_BED, 2, 0, 0);
@@ -292,8 +299,8 @@ public class SATCompiler {
         list3.add(student4);
         Set<Student> list4 = new HashSet<Student>();
         list4.add(student3);
-        Student_Request student_request3 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.MUSLIM, Smoking.NO, list3, new HashSet<Student>());
-        Student_Request student_request4 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.MUSLIM, Smoking.NO, list4, new HashSet<Student>());
+        Student_Request student_request3 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.MUSLIM, Smoking.NO, list3, new HashSet<Student>());
+        Student_Request student_request4 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.MUSLIM, Smoking.NO, list4, new HashSet<Student>());
         student3.setStudentRequest(student_request3);
         student4.setStudentRequest(student_request4);
         //third apartment group
@@ -303,8 +310,8 @@ public class SATCompiler {
         list5.add(student6);
         Set<Student> list6 = new HashSet<Student>();
         list6.add(student5);
-        Student_Request student_request5 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.JEWISH, Smoking.NO, list5, new HashSet<Student>());
-        Student_Request student_request6 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.JEWISH, Smoking.NO, list6, new HashSet<Student>());
+        Student_Request student_request5 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.JEWISH, Smoking.NO, list5, new HashSet<Student>());
+        Student_Request student_request6 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.JEWISH, Smoking.NO, list6, new HashSet<Student>());
         student5.setStudentRequest(student_request5);
         student6.setStudentRequest(student_request6);
         //CONTINUE
@@ -312,17 +319,17 @@ public class SATCompiler {
         Student student8 = new Student("8", "8", "8", Student.Sex.MALE, 3);
         Student student9 = new Student("9", "9", "9", Student.Sex.MALE, 3);
         Set<Student> list7 = new HashSet<Student>();
-        list3.add(student8);
-        list3.add(student9);
+        list7.add(student8);
+        list7.add(student9);
         Set<Student> list8 = new HashSet<Student>();
-        list4.add(student7);
-        list4.add(student9);
+        list8.add(student7);
+        list8.add(student9);
         Set<Student> list9 = new HashSet<Student>();
-        list4.add(student7);
-        list4.add(student8);
-        Student_Request student_request7 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.JEWISH, Smoking.NO, list7, new HashSet<Student>());
-        Student_Request student_request8 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.JEWISH, Smoking.NO, list8, new HashSet<Student>());
-        Student_Request student_request9 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.YES, 1000, Religious.JEWISH, Smoking.NO, list9, new HashSet<Student>());
+        list9.add(student7);
+        list9.add(student8);
+        Student_Request student_request7 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.JEWISH, Smoking.NO, list7, new HashSet<Student>());
+        Student_Request student_request8 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.JEWISH, Smoking.NO, list8, new HashSet<Student>());
+        Student_Request student_request9 = new Student_Request(Dormitory.Dormitory_Type.DALED_EAST, Couples_Dormitory.NO, 1000, Religious.JEWISH, Smoking.NO, list9, new HashSet<Student>());
         student7.setStudentRequest(student_request7);
         student8.setStudentRequest(student_request8);
         student9.setStudentRequest(student_request9);
