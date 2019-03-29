@@ -1,6 +1,11 @@
 package Model;
 
+import java.util.HashMap;
+import java.util.Objects;
+
 public class Student {
+
+    public static HashMap<String, Student> students = new HashMap<String, Student>();
 
     public enum Sex{
         MALE,FEMALE
@@ -14,8 +19,28 @@ public class Student {
     private Student_Request studentRequest;
 
 
+    private void init(){
+        students.put(ID,this);
+    }
+
     public Student(String ID) {
         this.ID = ID;
+
+        init();
+    }
+
+    public Student(String ID, String firstName, String lastName, Sex sex, int study_Year) {
+        this.ID = ID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.sex = sex;
+        Study_Year = study_Year;
+
+        init();
+    }
+
+    public void setStudentRequest(Student_Request studentRequest) {
+        this.studentRequest = studentRequest;
     }
 
     public Student(String ID, String firstName, String lastName, Sex sex, int study_Year, Student_Request studentRequest) {
@@ -25,6 +50,8 @@ public class Student {
         this.sex = sex;
         Study_Year = study_Year;
         this.studentRequest = studentRequest;
+
+        init();
     }
 
     public String getFirstName() {
@@ -61,5 +88,18 @@ public class Student {
                 ", Study_Year=" + Study_Year +
                 ", studentRequest=" + studentRequest +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return ID.equals(student.ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ID);
     }
 }

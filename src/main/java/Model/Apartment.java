@@ -1,8 +1,12 @@
 package Model;
 
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class Apartment {
+
+    public static HashMap<String, Apartment> apartments = new HashMap<String, Apartment>();
 
     private String Apartment_ID;
     private Dormitory.Dormitory_Type dormitory_type;
@@ -18,6 +22,8 @@ public abstract class Apartment {
         Apartment_Quantity = apartment_Quantity;
         this.floor = floor;
         this.price = price;
+
+        apartments.put(apartment_ID,this);
     }
 
     public String getApartment_ID() {
@@ -54,5 +60,18 @@ public abstract class Apartment {
 
     public int getPrice() {
         return price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Apartment apartment = (Apartment) o;
+        return Apartment_ID.equals(apartment.Apartment_ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Apartment_ID);
     }
 }
